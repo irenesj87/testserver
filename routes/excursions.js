@@ -4,7 +4,13 @@ const excursions = require("../data/excursionsData");
 
 /** GET */
 router.get("/", function (req, res, next) {
-	// Variable that has the search info from the searchbar
+    /* req.query: En Express.js, req representa la petición HTTP. Es una propiedad de este objeto que tiene cualquier
+     parámetro enviado en la URL. Por ejemplo, si alguien accede a /excursions?q=hiking&difficulty=easy, entonces
+     req.query será { q:'hiking', difficulty:'easy' } */
+    // || "" : Esto se utiliza para dar un valor por defecto
+	/* Variable que guarda el valor del parámetro 'q' de la petición HTTP. Si 'q' existe, su valor se guarda en 'search'. 
+    Si el parámetro 'q' no existe, la variable guarda un string vacío. Esto previene errores y asegura que 'search' siempre
+    tenga un string con el que trabajar */
 	const search = req.query["q"] || "";
 	// Variable that has the search info from the area filter
 	const area = req.query["area"] || "";
