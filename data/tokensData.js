@@ -5,7 +5,7 @@
  * }
  */
 
-// Array to save tokens of users that are logged in or just registered. Their token is associated with their mail
+// Array para guardar los tokens de los usuarios que se loguean o registran. Su token está asociado con su correo.
 var tokens = {};
 
 module.exports = tokens;

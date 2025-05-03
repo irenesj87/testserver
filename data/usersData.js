@@ -1,4 +1,4 @@
-/* Array to save users */
+/* Array de usuarios */
 var users = [
 	{
 		id: 0,

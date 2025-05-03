@@ -7,16 +7,16 @@ const filtersData = require("../data/excursionsData");
 // http://localhost:3001/filters?type=difficulty
 // http://localhost:3001/filters?type=time
 router.get("/", function (req, res, next) {
-	// Array that saves the filters info
+	// Array que guarda la info de los filtros
 	let arrayResult = [];
-	// Copy array of arrayResult that is used to copy the information that arrayResult
+	// Copia de arrayResult que se usa para copiar la información de arrayResult
 	let arrayResultCopy = [];
-	// Variable that has the type of filter that is needed in that moment
+	// Variable que tiene el tipo de filtro que se necesita en ese momento
 	const filter = req.query["type"] || "";
 
-	// If filter is area, difficulty or time then
+	// Si el filtro es area, difficulty o time entonces
 	if (["area", "difficulty", "time"].includes(filter)) {
-		// We save the correct filters in the arrayResult
+		// Se guardan los filtros correctos en arrayResult
 		arrayResult = filtersData.map(function (excursion) {
 			switch (filter) {
 				case "area":
@@ -31,7 +31,7 @@ router.get("/", function (req, res, next) {
 					if (!arrayResult.includes(excursion.time))
 						arrayResult.push(excursion.time);
 			}
-			// Then we copy the array to arrayResultCopy to not lose the info that arrayResult had
+			// Después esto se copia en arrayResultCopy para no perder la información que arrayResult tenía
 			arrayResultCopy = arrayResult.valueOf();
 		});
 

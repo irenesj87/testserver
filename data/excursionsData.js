@@ -1,4 +1,4 @@
-/* Array to save excursions */
+/* Array de excursiones*/
 var excursions = [
 	{
 		id: 0,
