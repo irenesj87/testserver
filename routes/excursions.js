@@ -4,58 +4,63 @@ const excursions = require("../data/excursionsData");
 
 /** GET */
 router.get("/", function (req, res, next) {
-    /* req.query: En Express.js, req representa la petición HTTP. Es una propiedad de este objeto que tiene cualquier
+	/* req.query: En Express.js, req representa la petición HTTP. Es una propiedad de este objeto que tiene cualquier
      parámetro enviado en la URL. Por ejemplo, si alguien accede a /excursions?q=hiking&difficulty=easy, entonces
-     req.query será { q:'hiking', difficulty:'easy' } */
-    // || "" : Esto se utiliza para dar un valor por defecto
+     req.query será { q:'hiking', difficulty:'easy' }. Se utiliza la letra 'q' porque viene de query, normalmente los desarrolladores urilizan esa letra
+	 cuando se hacen búsquedas */
+	// || "" : Esto se utiliza para dar un valor por defecto
 	/* Variable que guarda el valor del parámetro 'q' de la petición HTTP. Si 'q' existe, su valor se guarda en 'search'. 
     Si el parámetro 'q' no existe, la variable guarda un string vacío. Esto previene errores y asegura que 'search' siempre
     tenga un string con el que trabajar */
 	const search = req.query["q"] || "";
-	// Variable that has the search info from the area filter
+	// Variable que tiene la info del filtro 'area'
 	const area = req.query["area"] || "";
-	// Variable that has the search info from difficulty
+	// Variable que tiene la info del filtro 'difficulty'
 	const difficulty = req.query["difficulty"] || "";
-	// Variable that has the search info from the time filter
+	// // Variable que tiene la info del filtro 'time'
 	const time = req.query["time"] || "";
 
-	// Setting the headers to be able to send petitions from any domain
+	// Seteando las headers para poder mandar peticiones desde cualquier dominio
 	res.setHeader("Access-Control-Allow-Origin", "*");
 
 	// Copy variable of the excursions array, we use this to not change the info in the excursions array
 	let excursionsCopy = [...excursions];
 
-	// If the user has searched something on the search bar
+	// Si el usuario ha buscado algo en la barra de búsqueda
 	if (search !== "") {
 		const searchLower = search.toLowerCase();
-		excursionsCopy = excursionsCopy.filter(
-			/*(excursion) => excursion.name.toLowerCase() == search.toLowerCase()*/
-			(excursion) => excursion.name.toLowerCase().includes(searchLower)
+		excursionsCopy = excursionsCopy.filter((excursion) =>
+			excursion.name.toLowerCase().includes(searchLower)
 		);
 	}
-	// If the user has searched something with the area filter
+	// Si el usuario ha buscado algo con el filtro 'area'
 	if (area != "") {
 		const areaFiltersResults = area
+			/* Este método toma el string 'area' y los separa en un array de substrings cada vez que encuentra una coma.
+			Por ejemplo, "beach, mountain, forest" resulta en el array ["beach", "mountain", "forest"]. */
 			.split(",")
 			.map((i) => i.trim().toLowerCase());
+		// Se retorna un array copia con todas las excursiones que tengan ese area
 		excursionsCopy = excursionsCopy.filter((excursion) =>
 			areaFiltersResults.includes(excursion.area.toLowerCase())
 		);
 	}
-	// If the user has searched something with the difficulty filter
+	//  Si el usuario ha buscado algo con el filtro 'difficulty'
 	if (difficulty != "") {
 		const difficultyFiltersResults = difficulty
 			.split(",")
 			.map((i) => i.trim().toLowerCase());
+		// Se retorna un array copia con todas las excursiones que tengan esa dificultad
 		excursionsCopy = excursionsCopy.filter((excursion) =>
 			difficultyFiltersResults.includes(excursion.difficulty.toLowerCase())
 		);
 	}
-	// If the user has searched something with the time filter
+	//  Si el usuario ha buscado algo con el filtro 'time'
 	if (time != "") {
 		const timeFiltersResults = time
 			.split(",")
 			.map((i) => i.trim().toLowerCase());
+		// Se retorna un array copia con todas las excursiones que tengan ese tiempo
 		excursionsCopy = excursionsCopy.filter((excursion) =>
 			timeFiltersResults.includes(excursion.time.toLowerCase())
 		);
