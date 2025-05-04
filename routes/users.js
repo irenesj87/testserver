@@ -23,12 +23,12 @@ router.post("/", function (req, res) {
 	const { mail } = req.body;
 
 	// Se comprueba si ya hay un usuario con ese correo
-	let arrayResult = users.filter(
+	const userFound = users.find(
 		(user) => user.mail.toLowerCase() == mail.toLowerCase()
 	);
 
 	// Si hay uno
-	if (arrayResult.length > 0) {
+	if (userFound) {
 		res
 			.status(409)
 			.json({ error: "Ya existe un usuario con ese correo electrónico." });
@@ -68,7 +68,7 @@ router.put("/:mail", function (req, res, next) {
 	);
 	// Obtenemos el correo con el que el usuario está logueado en este momento...
 	const currentMail = req.params["mail"];
-	// ...y se mira si hay un usuario está en la base de datos con ese correo
+	// ...y se mira si hay un usuario que está en la base de datos con ese correo
 	const currentUser = users.filter(
 		(user) => user.mail.toLowerCase() == currentMail.toLowerCase()
 	);
