@@ -5,7 +5,7 @@ const router = express.Router();
 const users = require("../data/usersData");
 const { validToken } = require("../helpers/helpers");
 
-/** GET to get the users mail */
+/** GET para obtener el correo del usuario */
 router.get("/", function (req, res, next) {
 	const response = users.map((userMail) => {
 		return { user: userMail };
@@ -14,62 +14,69 @@ router.get("/", function (req, res, next) {
 	res.status(200).json(response);
 });
 
-// Counter for users's id
+// Contador para el id del usuario
 let counter = 2;
 
-/** POST for creating a new user */
+/** POST para crear un nuevo usuario */
 router.post("/", function (req, res) {
-	// First we get the mail of the user that wants to register
+	// Primero obtenemos el correo del usuario que se quiere registrar
 	const { mail } = req.body;
 
-	// We see if there´s already an user with that mail in the database
+	// Se comprueba si ya hay un usuario con ese correo
 	let arrayResult = users.filter(
 		(user) => user.mail.toLowerCase() == mail.toLowerCase()
 	);
 
-	// If there's one
+	// Si hay uno
 	if (arrayResult.length > 0) {
 		res
 			.status(409)
 			.json({ error: "Ya existe un usuario con ese correo electrónico." });
 	} else {
-		// If there´s not, we create an user with the info sent in the petition, an empty array of excursions and an id
+		// Si no lo hay, creamos un usuario con la info mandada en la petición, un array vacío de excursiones y un id
 		const user = {
 			...req.body,
 			excursions: [],
 			id: counter,
 		};
-		// And then we add it to the array of users
+		// Y después se añade al array de usuarios
 		users.push(user);
 		res
 			.status(201)
+			/* res.setHeader(name, value): Es un método de Express.js. Se usa para setear una cabecera HTTP específica en
+			la respuesta que se mandará otra vez al cliente */
+			/* Location: Es el nombre de la cabecera HTTP. Cuando se usa con un código '201 Created'dice al cliente la URL 
+			exacta donde se encuentra el recurso que se acaba de crear */
+			/* Esta línea setea la cabecera Location en la respuesta para apuntar a la URL específica del usuario que se acaba de crear.
+			Es una práctica estándar en las APIs RESTful */
 			.setHeader("Location", `http://localhost:3001/users/${counter}`);
 		counter++;
 		res.json(user);
 	}
 });
 
-/** PUT for updating user info */
+/** PUT para actualizar la info del usuario */
 router.put("/:mail", function (req, res, next) {
-	// We see if the token is valid and if it pertains to the user that wants to update his/her info
+	// Se comprueba si el token es válido y si pertenece al usuario que quiere actualizar su info
 	if (!req.headers.authorization) {
 		res.status(401).send();
 		return;
 	}
-	// If the token is valid, (if it's in the database)
+	// Si el token es válido, (si está en la base de datos)
 	const currentToken = validToken(
 		req.headers.authorization.substring("Bearer ".length)
 	);
-	// We obtain the mail of the user currently logged in...
+	// Obtenemos el correo con el que el usuario está logueado en este momento...
 	const currentMail = req.params["mail"];
-	// ...and see if there's an user in the database with that mail
+	// ...y se mira si hay un usuario está en la base de datos con ese correo
 	const currentUser = users.filter(
 		(user) => user.mail.toLowerCase() == currentMail.toLowerCase()
 	);
 
-	// If the token and the token of the current user is the same
+	// Si el token de la base de datos y el token del usuario actual es el mismo
 	if (currentToken && currentUser[0]) {
-		// We update the user's info
+		/* Object.assign(target, source): Es una función de JavaScript. Copia todas las propiedades enumerables de uno o más
+		 objetos (req.body) a otro objeto (currentUser[0]). Con esto se actualiza la info del usuario */
 		Object.assign(currentUser[0], req.body);
 		res.status(200).json(currentUser[0]);
 	} else {
