@@ -84,7 +84,7 @@ router.put("/:mail", function (req, res, next) {
 	}
 });
 
-/** PUT for updating the users's excursions list */
+/** PUT para actualizar la lista de excursiones a las que el usuario se ha apuntado */
 router.put("/:mail/excursions/:id", function (req, res, next) {
 	// We see if the token is valid and if it pertains to the user that wants to update his/her info
 	if (!req.headers.authorization) {
