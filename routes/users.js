@@ -4,7 +4,6 @@ const tokens = require("../data/tokensData");
 const users = require("../data/usersData");
 const { validToken } = require("../helpers/helpers");
 
-// --- Authentication Middleware ---
 const authenticateToken = (req, res, next) => {
 	console.log("--- Running authenticateToken Middleware ---");
 	try {
@@ -37,7 +36,6 @@ const authenticateToken = (req, res, next) => {
 			.json({ error: "Internal Server Error during authentication." });
 	}
 };
-// --- End Authentication Middleware ---
 
 /** GET para obtener el correo del usuario */
 router.get("/", function (req, res, next) {
@@ -91,13 +89,24 @@ router.post("/", function (req, res) {
 router.put("/:mail", authenticateToken, function (req, res, next) {
 	console.log(`PUT /users/${req.params["mail"]} - Request received.`); // Log start
 	try {
-		// Get the email associated with the token
-		const emailFromToken = req.tokenEmail; // Provided by authenticateToken middleware
+		// Obtenemos el correo asociado al token
+		const emailFromToken = req.tokenEmail; // Lo da el middleware authenticateToken
 		console.log("Route Handler: Email associated with token:", emailFromToken);
 		// Obtenemos el correo del usuario a modificar desde la URL
 		const targetMail = req.params["mail"];
 		console.log("Route Handler: Target user email from URL:", targetMail);
-		// Buscamos el usuario a actualizar
+		// Si el correo asociado al token no es el mismo que el correo del usuario que quiere actualizar su info...
+		// Esta comprobación de seguridad se hace para que otro usuario no pueda modificar la info del usuario actual
+		if (emailFromToken.toLowerCase() !== targetMail.toLowerCase()) {
+			// Se avisa del error
+			console.log(
+				`Authorization failed: Token email (${emailFromToken}) does not match target email (${targetMail}).`
+			);
+			return res
+				.status(403)
+				.json({ error: "Forbidden: You can only update your own profile." });
+		}
+		// ...si lo es, buscamos el usuario a actualizar
 		const currentUser = users.find(
 			(user) => user.mail.toLowerCase() === targetMail.toLowerCase()
 		);
@@ -107,12 +116,11 @@ router.put("/:mail", authenticateToken, function (req, res, next) {
 			return res.status(404).json({ error: "User not found." });
 		}
 		console.log("Found target user:", currentUser.mail);
-		Object.assign(currentUser, req.body); // Actualizamos la info del usuario
+		// Y si existe, actualizamos la info del usuario
+		Object.assign(currentUser, req.body);
 		return res.status(200).json(currentUser); // Se manda al cliente el usuario actualizado
 	} catch (error) {
-		// Catch any unexpected errors during the process
-		console.error("Unexpected error in PUT /users/:mail:", error); // Log the actual error
-		// Send a generic 500 error with a JSON body
+		console.error("Unexpected error in PUT /users/:mail:", error);
 		return res.status(500).json({ error: "Internal Server Error occurred." });
 	}
 });
@@ -122,10 +130,10 @@ router.put(
 	"/:mail/excursions/:id",
 	authenticateToken,
 	function (req, res, next) {
-		console.log(`PUT /users/${req.params["mail"]} - Request received.`); // Log start
+		console.log(`PUT /users/${req.params["mail"]} - Request received.`);
 		try {
-			// Get the email associated with the token
-			const emailFromToken = req.tokenEmail; // Provided by authenticateToken middleware
+			// Obtenemos el correo asociado al token
+			const emailFromToken = req.tokenEmail;
 			console.log(
 				"Route Handler: Email associated with token:",
 				emailFromToken
@@ -133,6 +141,16 @@ router.put(
 			// Obtenemos el correo del usuario a modificar desde la URL
 			const targetMail = req.params["mail"];
 			console.log("Route Handler: Target user email from URL:", targetMail);
+			if (emailFromToken.toLowerCase() !== targetMail.toLowerCase()) {
+				console.log(
+					`Authorization failed: Token email (${emailFromToken}) does not match target email (${targetMail}).`
+				);
+				return res
+					.status(403)
+					.json({
+						error: "Forbidden: You can only update your own excursions.",
+					});
+			}
 			const currentUser = users.find(
 				(user) => user.mail.toLowerCase() == targetMail.toLowerCase()
 			);
