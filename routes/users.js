@@ -86,25 +86,25 @@ router.put("/:mail", function (req, res, next) {
 
 /** PUT para actualizar la lista de excursiones a las que el usuario se ha apuntado */
 router.put("/:mail/excursions/:id", function (req, res, next) {
-	// We see if the token is valid and if it pertains to the user that wants to update his/her info
+	// Se comprueba si el token es válido y si pertenece al usuario que quiere actualizar su info
 	if (!req.headers.authorization) {
 		res.status(401).send();
 		return;
 	}
-	// If the token is valid, (if it's in the database)
+	// Si el token es válido, (si está en la base de datos)
 	const currentToken = validToken(
 		req.headers.authorization.substring("Bearer ".length)
 	);
-	// We obtain the mail of the user currently logged in...
+	// Obtenemos el correo con el que el usuario está logueado en este momento...
 	const currentMail = req.params["mail"];
-	// ...and see if there's an user in the database with that mail
+	// ...y se mira si hay un usuario que está en la base de datos con ese correo
 	const currentUser = users.filter(
 		(user) => user.mail.toLowerCase() == currentMail.toLowerCase()
 	);
 
-	// If the token and the token of the current user is the same
+	// Si el token de la base de datos y el token del usuario actual es el mismo
 	if (currentToken && currentUser[0]) {
-		// We add the excursion to his/her array of excursions
+		// Se añade la excursión a su array de excursiones
 		currentUser[0].excursions.push(parseInt(req.params["id"]));
 		res.status(200).json(currentUser[0]);
 	} else {
