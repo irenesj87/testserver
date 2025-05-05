@@ -1,11 +1,11 @@
 /**
  *
- * example: {
+ * ejemplo: {
  *    "98234ygh9238": "usuario1@mail.com"
  * }
  */
 
-// Array para guardar los tokens de los usuarios que se loguean o registran. Su token está asociado con su correo.
+// Array para guardar los tokens de los usuarios que se loguean o registran. Su token está asociado con su correo (mapa).
 var tokens = {};
 
 module.exports = tokens;
