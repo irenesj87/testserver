@@ -14,7 +14,7 @@ router.get("/", function (req, res, next) {
 	// Variable que tiene el tipo de filtro que se necesita en ese momento
 	const filter = req.query["type"] || "";
 
-	// Si el filtro es area, difficulty o time entonces
+	// Si el filtro es 'area', 'difficulty' o 'time' entonces
 	if (["area", "difficulty", "time"].includes(filter)) {
 		// Se guardan los filtros correctos en arrayResult
 		arrayResult = filtersData.map(function (excursion) {
