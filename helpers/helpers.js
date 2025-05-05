@@ -1,8 +1,11 @@
 const tokens = require("../data/tokensData");
 
-// Función que dice si el token es válido. Un token es válido cuando está en nuestra basde datos, en este caso en el array "tokens"
+// Función que valida un token. Retorna el token string si es válido (existe en tokensData), o null si no es válido.
 const validToken = (authorizationString) => {
-	return authorizationString in tokens;
+	if (authorizationString && authorizationString in tokens) {
+		return authorizationString;
+	}
+	return null;
 };
 
 // Función que genera un token con 40 letras y números aleatorios
