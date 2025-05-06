@@ -4,9 +4,12 @@ const tokens = require("../data/tokensData");
 const users = require("../data/usersData");
 const { validToken } = require("../helpers/helpers");
 
+/* Middleware: En Express.js son funciones que tienen acceso a los objetos request y response y la función next. Son los que 
+realizan los pasos que deben ir entre que una petición llega hasta que va a su handler route final. */
+// Middleware que dice si un token es válido o no
 const authenticateToken = (req, res, next) => {
-	console.log("--- Running authenticateToken Middleware ---");
 	try {
+		// Se guardan las credenciales de autenticación del usuario
 		const authHeader = req.headers.authorization;
 		if (!authHeader || !authHeader.startsWith("Bearer ")) {
 			console.log(
@@ -16,25 +19,44 @@ const authenticateToken = (req, res, next) => {
 				.status(401)
 				.json({ error: "Authorization header missing or invalid." });
 		}
+		// Se obtiene el token de la cabecera
 		const tokenString = authHeader.substring("Bearer ".length);
-		const currentToken = validToken(tokenString); // Returns token string if valid, null otherwise
+		const currentToken = validToken(tokenString); // Retorna un string con el token si es válido y null si no lo es
 		console.log("Auth Middleware: Validated token:", currentToken);
 		if (!currentToken) {
-			// validToken returns null if not found in tokens or invalid format
-			//console.log("Auth Middleware: Token not found in tokensData or invalid.");
 			return res.status(401).json({ error: "Invalid or expired token." });
 		}
-		// Attach token and associated email to request object for use in next handlers
+		// Mete el token y su correo asociado al objeto request
 		req.token = currentToken;
-		req.tokenEmail = tokens[currentToken]; // Get email associated with this valid token
+		req.tokenEmail = tokens[currentToken];
 		console.log(`Auth Middleware: Attached req.tokenEmail = ${req.tokenEmail}`);
-		next(); // Proceed to the next middleware or route handler
+		next();
 	} catch (error) {
 		console.error("Auth Middleware: Unexpected error:", error);
 		return res
 			.status(500)
 			.json({ error: "Internal Server Error during authentication." });
 	}
+};
+
+// Middleware que dice si un usuario puede modificar info o no
+const authorizeUserModification = (req, res, next) => {
+	// Obtenemos el correo asociado al token
+	const emailFromToken = req.tokenEmail; // Lo da el middleware authenticateToken
+	// Obtenemos el correo del usuario a modificar desde la URL
+	const targetMail = req.params["mail"];
+	// Si el correo asociado al token no es el mismo que el correo del usuario que quiere actualizar su info...
+	// Esta comprobación de seguridad se hace para que otro usuario no pueda modificar la info del usuario actual
+	if (emailFromToken.toLowerCase() !== targetMail.toLowerCase()) {
+		// ...se avisa del error
+		console.log(
+			`Authorization failed: Token email (${emailFromToken}) does not match target email (${targetMail}).`
+		);
+		return res
+			.status(403)
+			.json({ error: "Forbidden: You can only update your own profile." });
+	}
+	next();
 };
 
 /** GET para obtener el correo del usuario */
@@ -86,71 +108,48 @@ router.post("/", function (req, res) {
 });
 
 /** PUT para actualizar la info del usuario */
-router.put("/:mail", authenticateToken, function (req, res, next) {
-	console.log(`PUT /users/${req.params["mail"]} - Request received.`); // Log start
-	try {
-		// Obtenemos el correo asociado al token
-		const emailFromToken = req.tokenEmail; // Lo da el middleware authenticateToken
-		console.log("Route Handler: Email associated with token:", emailFromToken);
-		// Obtenemos el correo del usuario a modificar desde la URL
-		const targetMail = req.params["mail"];
-		console.log("Route Handler: Target user email from URL:", targetMail);
-		// Si el correo asociado al token no es el mismo que el correo del usuario que quiere actualizar su info...
-		// Esta comprobación de seguridad se hace para que otro usuario no pueda modificar la info del usuario actual
-		if (emailFromToken.toLowerCase() !== targetMail.toLowerCase()) {
-			// Se avisa del error
-			console.log(
-				`Authorization failed: Token email (${emailFromToken}) does not match target email (${targetMail}).`
+router.put(
+	"/:mail",
+	authenticateToken,
+	authorizeUserModification,
+	function (req, res, next) {
+		console.log(`PUT /users/${req.params["mail"]} - Request received.`); // Log start
+		try {
+			// Obtenemos el correo del usuario a modificar
+			const targetMail = req.params["mail"];
+			console.log("Route Handler: Target user email from URL:", targetMail);
+			// Buscamos el usuario a actualizar
+			const currentUser = users.find(
+				(user) => user.mail.toLowerCase() === targetMail.toLowerCase()
 			);
-			return res
-				.status(403)
-				.json({ error: "Forbidden: You can only update your own profile." });
+			// Comprobamos si el usuario existe
+			if (!currentUser) {
+				console.log(`User with email ${targetMail} not found.`);
+				return res.status(404).json({ error: "User not found." });
+			}
+			console.log("Found target user:", currentUser.mail);
+			// Y si existe, actualizamos la info del usuario
+			Object.assign(currentUser, req.body);
+			return res.status(200).json(currentUser); // Se manda al cliente el usuario actualizado
+		} catch (error) {
+			console.error("Unexpected error in PUT /users/:mail:", error);
+			return res.status(500).json({ error: "Internal Server Error occurred." });
 		}
-		// ...si lo es, buscamos el usuario a actualizar
-		const currentUser = users.find(
-			(user) => user.mail.toLowerCase() === targetMail.toLowerCase()
-		);
-		// Comprobamos si el usuario existe
-		if (!currentUser) {
-			console.log(`User with email ${targetMail} not found.`);
-			return res.status(404).json({ error: "User not found." });
-		}
-		console.log("Found target user:", currentUser.mail);
-		// Y si existe, actualizamos la info del usuario
-		Object.assign(currentUser, req.body);
-		return res.status(200).json(currentUser); // Se manda al cliente el usuario actualizado
-	} catch (error) {
-		console.error("Unexpected error in PUT /users/:mail:", error);
-		return res.status(500).json({ error: "Internal Server Error occurred." });
 	}
-});
+);
 
 /** PUT para actualizar la lista de excursiones a las que el usuario se ha apuntado */
 router.put(
 	"/:mail/excursions/:id",
 	authenticateToken,
+	authorizeUserModification,
 	function (req, res, next) {
 		console.log(`PUT /users/${req.params["mail"]} - Request received.`);
 		try {
-			// Obtenemos el correo asociado al token
-			const emailFromToken = req.tokenEmail;
-			console.log(
-				"Route Handler: Email associated with token:",
-				emailFromToken
-			);
 			// Obtenemos el correo del usuario a modificar desde la URL
 			const targetMail = req.params["mail"];
 			console.log("Route Handler: Target user email from URL:", targetMail);
-			if (emailFromToken.toLowerCase() !== targetMail.toLowerCase()) {
-				console.log(
-					`Authorization failed: Token email (${emailFromToken}) does not match target email (${targetMail}).`
-				);
-				return res
-					.status(403)
-					.json({
-						error: "Forbidden: You can only update your own excursions.",
-					});
-			}
+			// Buscamos el usuario a actualizar
 			const currentUser = users.find(
 				(user) => user.mail.toLowerCase() == targetMail.toLowerCase()
 			);
