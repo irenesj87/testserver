@@ -1,5 +1,5 @@
 /* Array de usuarios */
-var users = [
+const users = [
 	{
 		id: 0,
 		name: "usuario1",

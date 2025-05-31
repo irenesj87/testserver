@@ -11,7 +11,7 @@ const authenticateToken = (req, res, next) => {
 	try {
 		// Se guardan las credenciales de autenticación del usuario
 		const authHeader = req.headers.authorization;
-		if (!authHeader || !authHeader.startsWith("Bearer ")) {
+		if (!authHeader?.startsWith("Bearer ")) {
 			console.log(
 				"Auth Middleware: Authorization header missing or invalid format."
 			);

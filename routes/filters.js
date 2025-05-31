@@ -7,35 +7,27 @@ const filtersData = require("../data/excursionsData");
 // http://localhost:3001/filters?type=difficulty
 // http://localhost:3001/filters?type=time
 router.get("/", function (req, res, next) {
-	// Array que guarda la info de los filtros
-	let arrayResult = [];
-	// Copia de arrayResult que se usa para copiar la información de arrayResult
-	let arrayResultCopy = [];
 	// Variable que tiene el tipo de filtro que se necesita en ese momento
-	const filter = req.query["type"] || "";
+	const filterType = req.query["type"] || "";
 
 	// Si el filtro es 'area', 'difficulty' o 'time' entonces
-	if (["area", "difficulty", "time"].includes(filter)) {
-		// Se guardan los filtros correctos en arrayResult
-		arrayResult = filtersData.map(function (excursion) {
-			switch (filter) {
-				case "area":
-					if (!arrayResult.includes(excursion.area))
-						arrayResult.push(excursion.area);
-					break;
-				case "difficulty":
-					if (!arrayResult.includes(excursion.difficulty))
-						arrayResult.push(excursion.difficulty);
-					break;
-				case "time":
-					if (!arrayResult.includes(excursion.time))
-						arrayResult.push(excursion.time);
-			}
-			// Después esto se copia en arrayResultCopy para no perder la información que arrayResult tenía
-			arrayResultCopy = arrayResult.valueOf();
-		});
+	if (["area", "difficulty", "time"].includes(filterType)) {
+		// 1. Extrae todos los valores para el tipo de filtro especificado.
+		//    Por ejemplo, si filterType es "area", allValuesForFilter será: ["Centro-Este", "Este", "Este", ...]
+		//    La función flecha (excursion => excursion[filterType]) retorna implícitamente excursion[filterType].
+		const allValuesForFilter = filtersData.map(
+			(excursion) => excursion[filterType]
+		);
 
-		res.status(200).json(arrayResultCopy);
+		// 2. Usa un Set para obtener solo los valores únicos.
+		//    Siguiendo el ejemplo, uniqueValuesSet sería: Set { "Centro-Este", "Este" }
+		const uniqueValuesSet = new Set(allValuesForFilter);
+
+		// 3. Convierte el Set de nuevo a un array para la respuesta JSON.
+		//    uniqueValuesArray sería: ["Centro-Este", "Este"]
+		const uniqueValuesArray = [...uniqueValuesSet];
+
+		res.status(200).json(uniqueValuesArray);
 	} else {
 		res.status(400).json({ error: "Petición incorrecta al servidor" });
 	}
