@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const tokens = require("../data/tokensData");
 const users = require("../data/usersData");
+const excursions = require("../data/excursionsData");
 const { validToken } = require("../helpers/helpers");
 
 /* Middleware: En Express.js son funciones que tienen acceso a los objetos request y response y la función next. Son los que 
@@ -13,18 +14,18 @@ const authenticateToken = (req, res, next) => {
 		const authHeader = req.headers.authorization;
 		if (!authHeader?.startsWith("Bearer ")) {
 			console.log(
-				"Auth Middleware: Authorization header missing or invalid format."
+				"Auth Middleware: La cabecera de autorización no se encuentra o es inválida."
 			);
 			return res
 				.status(401)
-				.json({ error: "Authorization header missing or invalid." });
+				.json({ error: "Cabecera de autorización no encontrada o inválida." });
 		}
 		// Se obtiene el token de la cabecera
 		const tokenString = authHeader.substring("Bearer ".length);
 		const currentToken = validToken(tokenString); // Retorna un string con el token si es válido y null si no lo es
-		console.log("Auth Middleware: Validated token:", currentToken);
+		console.log("Auth Middleware: Token validado:", currentToken);
 		if (!currentToken) {
-			return res.status(401).json({ error: "Invalid or expired token." });
+			return res.status(401).json({ error: "Token inválido o expirado." });
 		}
 		// Mete el token y su correo asociado al objeto request
 		req.token = currentToken;
@@ -32,10 +33,10 @@ const authenticateToken = (req, res, next) => {
 		console.log(`Auth Middleware: Attached req.tokenEmail = ${req.tokenEmail}`);
 		next();
 	} catch (error) {
-		console.error("Auth Middleware: Unexpected error:", error);
+		console.error("Auth Middleware: Error inesperado:", error);
 		return res
 			.status(500)
-			.json({ error: "Internal Server Error during authentication." });
+			.json({ error: "Error del servidor durante la autenticación." });
 	}
 };
 
@@ -61,10 +62,8 @@ const authorizeUserModification = (req, res, next) => {
 
 /** GET para obtener el correo del usuario */
 router.get("/", function (req, res, next) {
-	const response = users.map((userMail) => {
-		return { user: userMail };
-	});
-
+	// Se excluye la contraseña de la respuesta por seguridad.
+	const response = users.map(({ password, ...user }) => user);
 	res.status(200).json(response);
 });
 
@@ -85,14 +84,20 @@ router.post("/", function (req, res) {
 			.status(409)
 			.json({ error: "Ya existe un usuario con ese correo electrónico." });
 	} else {
+		// IMPORTANTE: Aquí se debería hashear la contraseña antes de guardarla.
+		// Ejemplo con una librería como bcrypt:
+		// const hashedPassword = await bcrypt.hash(req.body.password, 10);
 		// Si no lo hay, creamos un usuario con la info mandada en la petición, un array vacío de excursiones y un id
 		const user = {
 			...req.body,
+			// password: hashedPassword, // Se guardaría la contraseña hasheada
 			excursions: [],
 			id: counter,
 		};
 		// Y después se añade al array de usuarios
 		users.push(user);
+		// Se prepara la respuesta sin la contraseña por seguridad
+		const { password, ...userResponse } = user;
 		res
 			.status(201)
 			/* res.setHeader(name, value): Es un método de Express.js. Se usa para setear una cabecera HTTP específica en
@@ -103,7 +108,7 @@ router.post("/", function (req, res) {
 			Es una práctica estándar en las APIs RESTful */
 			.setHeader("Location", `http://localhost:3001/users/${counter}`);
 		counter++;
-		res.json(user);
+		res.json(userResponse);
 	}
 });
 
@@ -130,13 +135,36 @@ router.put(
 			console.log("Found target user:", currentUser.mail);
 			// Y si existe, actualizamos la info del usuario
 			Object.assign(currentUser, req.body);
-			return res.status(200).json(currentUser); // Se manda al cliente el usuario actualizado
+			// Se manda al cliente el usuario actualizado (sin la contraseña)
+			const { password, ...userResponse } = currentUser;
+			return res.status(200).json(userResponse);
 		} catch (error) {
 			console.error("Unexpected error in PUT /users/:mail:", error);
 			return res.status(500).json({ error: "Internal Server Error occurred." });
 		}
 	}
 );
+
+/** GET para obtener las excursiones a las que un usuario se ha apuntado */
+router.get("/:id/excursions", function (req, res, next) {
+	// Se parsea el id del usuario de la URL a un número
+	const userId = parseInt(req.params.id, 10);
+	// Se busca al usuario por su id
+	const user = users.find((u) => u.id === userId);
+
+	// Si el usuario no se encuentra, se retorna un error 404
+	if (!user) {
+		return res.status(404).send("Usuario no encontrado");
+	}
+
+	// Se filtran las excursiones para obtener solo aquellas a las que el usuario está apuntado
+	const userExcursions = excursions.filter((excursion) =>
+		user.excursions.includes(excursion.id)
+	);
+
+	// Se retornan las excursiones del usuario en formato JSON
+	res.json(userExcursions);
+});
 
 /** PUT para actualizar la lista de excursiones a las que el usuario se ha apuntado */
 router.put(
@@ -161,7 +189,9 @@ router.put(
 			console.log("Route Handler: Found target user:", currentUser.mail);
 			// Se añade la excursión a su array de excursiones
 			currentUser.excursions.push(parseInt(req.params["id"]));
-			res.status(200).json(currentUser);
+			// Se retorna el usuario actualizado sin la contraseña
+			const { password, ...userResponse } = currentUser;
+			res.status(200).json(userResponse);
 		} catch (error) {
 			console.error(
 				"Unexpected error in PUT /users/:mail/excursions/:id:",

@@ -2,23 +2,42 @@ const express = require("express");
 const router = express.Router();
 const excursions = require("../data/excursionsData");
 
+/**
+ * Función auxiliar para aplicar filtros basados en una lista de valores en la query.
+ * @param {Array} data - El array de excursiones a filtrar.
+ * @param {string} filterValue - El valor del parámetro de la query (ej: "Centro, Este").
+ * @param {string} property - La propiedad del objeto excursión a comparar (ej: "area").
+ * @returns {Array} - El array de excursiones filtrado.
+ */
+const applyListFilter = (data, filterValue, property) => {
+	// Separa el string por comas, limpia los espacios, convierte a minúsculas y elimina valores vacíos.
+	const filterItems = filterValue
+		.split(",")
+		.map((item) => item.trim().toLowerCase())
+		.filter(Boolean); // Elimina strings vacíos ('') y otros valores "falsy" del array.
+
+	// Si no hay items de filtro válidos después de limpiar, no se aplica ningún filtro y se retornan los datos originales...
+	if (filterItems.length === 0) {
+		return data;
+	}
+	// ...y si los hay, se filtran los datos retornando sólo aquellos cuya propiedad coincide con los items del filtro.
+	return data.filter((excursion) =>
+		filterItems.includes(excursion[property].toLowerCase())
+	);
+};
+
 /** GET */
 router.get("/", function (req, res, next) {
 	/* req.query: En Express.js, req representa la petición HTTP. Es una propiedad de este objeto que tiene cualquier
      parámetro enviado en la URL. Por ejemplo, si alguien accede a /excursions?q=hiking&difficulty=easy, entonces
-     req.query será { q:'hiking', difficulty:'easy' }. Se utiliza la letra 'q' porque viene de query, normalmente los desarrolladores urilizan esa letra
-	 cuando se hacen búsquedas */
-	// || "" : Esto se utiliza para dar un valor por defecto
-	/* Variable que guarda el valor del parámetro 'q' de la petición HTTP. Si 'q' existe, su valor se guarda en 'search'. 
-    Si el parámetro 'q' no existe, la variable guarda un string vacío. Esto previene errores y asegura que 'search' siempre
-    tenga un string con el que trabajar */
-	const search = req.query["q"] || "";
-	// Variable que tiene la info del filtro 'area'
-	const area = req.query["area"] || "";
-	// Variable que tiene la info del filtro 'difficulty'
-	const difficulty = req.query["difficulty"] || "";
-	// // Variable que tiene la info del filtro 'time'
-	const time = req.query["time"] || "";
+     req.query será { q:'hiking', difficulty:'easy' }. Se utiliza la letra 'q' porque viene de query, normalmente los desarrolladores 
+	 utilizan esa letra cuando se hacen búsquedas */
+	/* Variable que guarda el valor del parámetro 'q' de la petición HTTP. Si 'q' existe, su valor se guarda en 'search'.
+	 * Si el parámetro 'q' no existe, la variable guarda un string vacío. Esto previene errores y asegura que 'search' siempre tenga un
+	 * string con el que trabajar
+	 */
+	// Se extrae el parámetro de búsqueda 'q' y el resto de filtros en un objeto 'filters'
+	const { q: search, ...filters } = req.query;
 
 	// Seteando las headers para poder mandar peticiones desde cualquier dominio
 	res.setHeader("Access-Control-Allow-Origin", "*");
@@ -27,67 +46,32 @@ router.get("/", function (req, res, next) {
 	let excursionsCopy = [...excursions];
 
 	// Si el usuario ha buscado algo en la barra de búsqueda
-	if (search !== "") {
-		const searchLower = search.toLowerCase();
+	if (search) {
+		const searchLower = search.toString().toLowerCase();
 		excursionsCopy = excursionsCopy.filter((excursion) =>
 			excursion.name.toLowerCase().includes(searchLower)
 		);
 	}
-	// Si el usuario ha buscado algo con el filtro 'area'
-	if (area != "") {
-		const areaFiltersResults = area
-			/* Este método toma el string 'area' y los separa en un array de substrings cada vez que encuentra una coma.
-			Por ejemplo, "beach, mountain, forest" resulta en el array ["beach", "mountain", "forest"]. */
-			.split(",")
-			.map((i) => i.trim().toLowerCase());
-		// Se retorna un array copia con todas las excursiones que tengan ese area
-		excursionsCopy = excursionsCopy.filter((excursion) =>
-			areaFiltersResults.includes(excursion.area.toLowerCase())
-		);
-	}
-	//  Si el usuario ha buscado algo con el filtro 'difficulty'
-	if (difficulty != "") {
-		const difficultyFiltersResults = difficulty
-			.split(",")
-			.map((i) => i.trim().toLowerCase());
-		// Se retorna un array copia con todas las excursiones que tengan esa dificultad
-		excursionsCopy = excursionsCopy.filter((excursion) =>
-			difficultyFiltersResults.includes(excursion.difficulty.toLowerCase())
-		);
-	}
-	//  Si el usuario ha buscado algo con el filtro 'time'
-	if (time != "") {
-		const timeFiltersResults = time
-			.split(",")
-			.map((i) => i.trim().toLowerCase());
-		// Se retorna un array copia con todas las excursiones que tengan ese tiempo
-		excursionsCopy = excursionsCopy.filter((excursion) =>
-			timeFiltersResults.includes(excursion.time.toLowerCase())
-		);
-	}
+
+	// Lista de propiedades por las que se puede filtrar
+	const filterableProperties = ["area", "difficulty", "time"];
+
+	// Se aplican todos los filtros que el usuario haya enviado en la URL de forma dinámica recorriendo la lista
+	// Esta línea inicia un bucle que va a recorrer los elementos del array filterableProperties. En cada pasada la variable property
+	// tomará un valor
+	filterableProperties.forEach((property) => {
+		// Se comprueba si el filtro existe
+		if (filters[property]) {
+			// Si existe, se aplica el filtro
+			excursionsCopy = applyListFilter(
+				excursionsCopy,
+				filters[property],
+				property
+			);
+		}
+	});
 
 	res.status(200).json(excursionsCopy);
 });
-
-/** POST 
-router.post('/', function (req, res) {
-
-    var name = req.body.name || '';
-
-    if (excursions.includes(name)) {
-
-        res.status(409).json({ error: 'Ya existe una excursión con ese nombre.' });
-
-    }
-    else {
-
-        excursions.push(name);
-        res.status(201).setHeader('Location', `http://localhost:3001/excursions/${name}`);
-        res.json({ name });
-
-    }
-}
-
-);*/
 
 module.exports = router;

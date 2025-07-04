@@ -24,10 +24,10 @@ const excursions = [
 		id: 2,
 		name: "Picos de Europa",
 		area: "Este",
-		difficulty: "Media",
+		difficulty: "Alta",
 		time: "3 días",
 		description:
-			"En esta excursión iremos hasta Vegarredonda y el mirador de Ordiales.",
+			"En esta excursión iremos hasta Vegarredonda.",
 	},
 ];
 
