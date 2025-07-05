@@ -146,25 +146,37 @@ router.put(
 );
 
 /** GET para obtener las excursiones a las que un usuario se ha apuntado */
-router.get("/:id/excursions", function (req, res, next) {
-	// Se parsea el id del usuario de la URL a un número
-	const userId = parseInt(req.params.id, 10);
-	// Se busca al usuario por su id
-	const user = users.find((u) => u.id === userId);
+router.get(
+	"/:mail/excursions",
+	authenticateToken,
+	authorizeUserModification,
+	function (req, res, next) {
+		// El correo del usuario ya ha sido validado por los middlewares
+		const userMail = req.params.mail;
+		// Se busca al usuario por su correo electrónico
+		const user = users.find(
+			(u) => u.mail.toLowerCase() === userMail.toLowerCase()
+		);
 
-	// Si el usuario no se encuentra, se retorna un error 404
-	if (!user) {
-		return res.status(404).send("Usuario no encontrado");
+		// Aunque el middleware ya protege, esta es una comprobación de seguridad adicional
+		if (!user) {
+			return res.status(404).json({ error: "Usuario no encontrado" });
+		}
+
+		// Si el usuario no tiene excursiones, se devuelve un array vacío para evitar trabajo innecesario
+		if (!user.excursions || user.excursions.length === 0) {
+			return res.json([]);
+		}
+
+		// Se filtran las excursiones para obtener solo aquellas a las que el usuario está apuntado
+		const userExcursions = excursions.filter((excursion) =>
+			user.excursions.includes(excursion.id)
+		);
+
+		// Se retornan las excursiones del usuario en formato JSON
+		res.json(userExcursions);
 	}
-
-	// Se filtran las excursiones para obtener solo aquellas a las que el usuario está apuntado
-	const userExcursions = excursions.filter((excursion) =>
-		user.excursions.includes(excursion.id)
-	);
-
-	// Se retornan las excursiones del usuario en formato JSON
-	res.json(userExcursions);
-});
+);
 
 /** PUT para actualizar la lista de excursiones a las que el usuario se ha apuntado */
 router.put(
