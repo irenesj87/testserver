@@ -1,5 +1,5 @@
 /* Array de excursiones */
-// const con arrays (u objetos) significa que la referencia al array no puede cambiar, pero el contenido del array sí puede 
+// const con arrays (u objetos) significa que la referencia al array no puede cambiar, pero el contenido del array sí puede
 // cambiar. Puedes añadir, eliminar o modificar elementos dentro de un array declarado con const.
 const excursions = [
 	{
@@ -26,8 +26,7 @@ const excursions = [
 		area: "Este",
 		difficulty: "Alta",
 		time: "3 días",
-		description:
-			"En esta excursión iremos hasta Vegarredonda.",
+		description: "En esta excursión iremos hasta Vegarredonda.",
 	},
 ];
 
