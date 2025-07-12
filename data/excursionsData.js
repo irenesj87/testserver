@@ -26,7 +26,15 @@ const excursions = [
 		area: "Este",
 		difficulty: "Alta",
 		time: "3 días",
-		description: "En esta excursión iremos hasta Vegarredonda.",
+		description: "De nuevo volvemos hasta este bonito paraje con la excursión más larga que se ha hecho hasta este momento. En esta excursión iremos hasta la hermosa zona de Vegarredonda.",
+	},
+	{
+		id: 3,
+		name: "Picos de Europa",
+		area: "Centro",
+		difficulty: "Alta",
+		time: "3 días",
+		description:"Descripción de la excursión."
 	},
 ];
 

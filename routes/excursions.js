@@ -3,18 +3,25 @@ const router = express.Router();
 const excursions = require("../data/excursionsData");
 
 /**
- * Función auxiliar para aplicar filtros basados en una lista de valores en la query.
+ * Función auxiliar para aplicar filtros. Ahora maneja tanto un string como un array de valores.
  * @param {Array} data - El array de excursiones a filtrar.
- * @param {string} filterValue - El valor del parámetro de la query (ej: "Centro, Este").
+ * @param {string | string[]} filterValue - El valor del parámetro de la query (ej: "Centro" o ["Centro", "Este"]).
  * @param {string} property - La propiedad del objeto excursión a comparar (ej: "area").
  * @returns {Array} - El array de excursiones filtrado.
  */
 const applyListFilter = (data, filterValue, property) => {
-	// Separa el string por comas, limpia los espacios, convierte a minúsculas y elimina valores vacíos.
-	const filterItems = filterValue
-		.split(",")
-		.map((item) => item.trim().toLowerCase())
-		.filter(Boolean); // Elimina strings vacíos ('') y otros valores "falsy" del array.
+	let filterItems;
+
+	// Si `filterValue` es un array (ej. ?area=A&area=B), lo usamos directamente.
+	// Si es un string (ej. ?area=A,B), lo dividimos por comas.
+	if (Array.isArray(filterValue)) {
+		filterItems = filterValue.map((item) => item.trim().toLowerCase());
+	} else {
+		filterItems = filterValue
+			.toString()
+			.split(",")
+			.map((item) => item.trim().toLowerCase());
+	}
 
 	// Si no hay items de filtro válidos después de limpiar, no se aplica ningún filtro y se retornan los datos originales...
 	if (filterItems.length === 0) {
