@@ -36,6 +36,14 @@ const excursions = [
 		time: "3 días",
 		description:"Descripción de la excursión."
 	},
+	{
+		id: 4,
+		name: "Excursión",
+		area: "Este",
+		difficulty: "Alta",
+		time: "1 día",
+		description: "Descripción de la excursión"
+	},
 ];
 
 module.exports = excursions;
