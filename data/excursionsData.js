@@ -8,8 +8,6 @@ const excursions = [
 		area: "Centro-Este",
 		difficulty: "Baja",
 		time: "6 horas",
-		description:
-			"En Cangas, iremos a ver el puente romano y haremos una ruta por sus iglesias.",
 	},
 	{
 		id: 1,
@@ -17,8 +15,6 @@ const excursions = [
 		area: "Este",
 		difficulty: "Media",
 		time: "2 días",
-		description:
-			"Los Picos de Europa son un parque muy extenso, así que en esta visita iremos a Los Lagos (llevando el itineriario corto) y también pasaremos a ver algo de la ruta del Cares.",
 	},
 	{
 		id: 2,
@@ -26,7 +22,6 @@ const excursions = [
 		area: "Este",
 		difficulty: "Alta",
 		time: "3 días",
-		description: "De nuevo volvemos hasta este bonito paraje con la excursión más larga que se ha hecho hasta este momento. En esta excursión iremos hasta la hermosa zona de Vegarredonda.",
 	},
 	{
 		id: 3,
@@ -34,7 +29,6 @@ const excursions = [
 		area: "Centro",
 		difficulty: "Alta",
 		time: "3 días",
-		description:"Descripción de la excursión."
 	},
 	{
 		id: 4,
@@ -42,7 +36,6 @@ const excursions = [
 		area: "Este",
 		difficulty: "Alta",
 		time: "1 día",
-		description: "Descripción de la excursión"
 	},
 ];
 
