@@ -19,13 +19,14 @@ Sigue estas instrucciones para tener una copia del proyecto funcionando en tu m�
   - **Recomendado:** Descarga el instalador "LTS" desde la página oficial de Node.js.
 
 - **Git:** Es el sistema de control de versiones utilizado para clonar los repositorios.
+
   - **Recomendado:** Descárgalo desde la página oficial de Git.
 
 - También se recomienda `nodemon` para el desarrollo, ya que reinicia el servidor automáticamente al detectar cambios en los archivos.
 
-```bash
-npm install -g nodemon
-```
+  ```bash
+  npm install -g nodemon
+  ```
 
 ### Instalación
 
