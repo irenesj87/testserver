@@ -6,7 +6,7 @@ const users = [
 		surname: "apellidosUsuario1",
 		phone: "678956453",
 		mail: "usuario1@mail.com",
-		password: "123456qw",
+		password: "123456qw.",
 		excursions: [],
 	},
 	{
@@ -15,7 +15,7 @@ const users = [
 		surname: "apellidosUsuario2",
 		phone: "680152657",
 		mail: "usuario2@mail.com",
-		password: "123456qr",
+		password: "123456qr.",
 		excursions: [],
 	},
 ];
