@@ -1,14 +1,14 @@
 # Servidor de Prueba para Excursiones
 
 Este proyecto es un servidor backend simple construido con Node.js y Express. Proporciona una API REST para gestionar y consultar una lista de excursiones, incluyendo funcionalidades de autenticación de usuarios, búsqueda y filtrado.
- 
+
 ## Características
 
-*   **Gestión de Excursiones**: Obtiene una lista de excursiones.
-*   **Búsqueda**: Busca excursiones por nombre.
-*   **Filtrado Dinámico**: Filtra excursiones por área, dificultad y tiempo.
-*   **Autenticación de Usuarios**: Endpoints para registro, login y validación de tokens.
-*   **Datos en Memoria**: Utiliza arrays de JavaScript como base de datos en memoria para facilitar las pruebas.
+- **Gestión de Excursiones**: Obtiene una lista de excursiones.
+- **Búsqueda**: Busca excursiones por nombre.
+- **Filtrado Dinámico**: Filtra excursiones por área, dificultad y tiempo.
+- **Autenticación de Usuarios**: Endpoints para registro, login y validación de tokens.
+- **Datos en Memoria**: Utiliza arrays de JavaScript como base de datos en memoria para facilitar las pruebas.
 
 Sigue estas instrucciones para tener una copia del proyecto funcionando en tu máquina local para desarrollo y pruebas.
 
@@ -34,4 +34,3 @@ npm install -g nodemon
     ```
 
 El servidor estará escuchando en `http://localhost:3001`.
-
