@@ -22,11 +22,19 @@ Sigue estas instrucciones para tener una copia del proyecto funcionando en tu m�
 
   - **Recomendado:** Descárgalo desde la página oficial de Git.
 
-- También se recomienda `nodemon` para el desarrollo, ya que reinicia el servidor automáticamente al detectar cambios en los archivos.
-
+- **Nodemon (Opcional pero recomendado):** Herramienta que reinicia el servidor automáticamente al detectar cambios en los archivos, agilizando el desarrollo.
   ```bash
   npm install -g nodemon
   ```
+
+Una vez instalados, puedes verificar que todo está correcto abriendo una terminal y ejecutando los siguientes comandos. Deberían mostrarte sus respectivas versiones:
+
+```bash
+node -v
+npm -v
+git --version
+nodemon -v
+```
 
 ### Instalación
 
