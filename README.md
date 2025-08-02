@@ -14,7 +14,14 @@ Sigue estas instrucciones para tener una copia del proyecto funcionando en tu m�
 
 ### Requisitos previos
 
-Se necesita tener instalado Node.js en el sistema. También se recomienda `nodemon` para el desarrollo, ya que reinicia el servidor automáticamente al detectar cambios en los archivos.
+- **Node.js (v16 o superior):** Es el entorno de ejecución para JavaScript. `npm` (Node Package Manager) se instala automáticamente con Node.js.
+
+  - **Recomendado:** Descarga el instalador "LTS" desde la página oficial de Node.js.
+
+- **Git:** Es el sistema de control de versiones utilizado para clonar los repositorios.
+  - **Recomendado:** Descárgalo desde la página oficial de Git.
+
+También se recomienda `nodemon` para el desarrollo, ya que reinicia el servidor automáticamente al detectar cambios en los archivos.
 
 ```bash
 npm install -g nodemon
