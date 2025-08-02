@@ -2,7 +2,7 @@
 
 Este proyecto es un servidor backend simple construido con Node.js y Express. Proporciona una API REST para gestionar y consultar una lista de excursiones, incluyendo funcionalidades de autenticación de usuarios, búsqueda y filtrado.
  
-## ✨ Características
+## Características
 
 *   **Gestión de Excursiones**: Obtiene una lista de excursiones.
 *   **Búsqueda**: Busca excursiones por nombre.
@@ -12,15 +12,15 @@ Este proyecto es un servidor backend simple construido con Node.js y Express. Pr
 
 Sigue estas instrucciones para tener una copia del proyecto funcionando en tu máquina local para desarrollo y pruebas.
 
-### ✅ Prerrequisitos
+### Requisitos previos
 
-Necesitarás tener instalado Node.js en tu sistema. También se recomienda `nodemon` para el desarrollo, ya que reinicia el servidor automáticamente al detectar cambios en los archivos.
+Se necesita tener instalado Node.js en el sistema. También se recomienda `nodemon` para el desarrollo, ya que reinicia el servidor automáticamente al detectar cambios en los archivos.
 
 ```bash
 npm install -g nodemon
 ```
 
-### ⚙️ Instalación
+### Instalación
 
 1.  Clona el repositorio o descarga el código fuente.
 2.  Navega al directorio `testserver` en tu terminal.
