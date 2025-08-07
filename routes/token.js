@@ -2,36 +2,66 @@ const express = require("express");
 const router = express.Router();
 const users = require("../data/usersData");
 const tokens = require("../data/tokensData");
+const { validToken } = require("../helpers/helpers");
 
-// Este endpoint verifica si un token es válido (si está en el mapa de tokens)
-// http://localhost:3001/token/
-/** GET */
-router.get("/:token", function (req, res) {
-	// Obtenemos el token de los parámetros de la petición HTTP
-	const currentToken = req.params["token"];
+/**
+ * @fileoverview Rutas para la gestión de tokens de autenticación.
+ * Proporciona un endpoint para verificar la validez de un token y obtener los datos del usuario asociado.
+ */
+const authenticateToken = (req, res, next) => {
+	try {
+		const authHeader = req.headers.authorization;
+		if (!authHeader?.startsWith("Bearer ")) {
+			return res.status(401).json({
+				message: "Cabecera de autorización no encontrada o inválida.",
+			});
+		}
 
-	// Si currentToken está en tokens entonces es un token válido
-	if (currentToken in tokens) {
-		// Obtenemos el correo del usuario del mapa de tokens
-		const userMail = tokens[currentToken];
-		// Con ese correo, obtenemos al usuario del array de usuarios
-		const arrayUser = users.filter((user) => user.mail == userMail);
+		const tokenString = authHeader.substring("Bearer ".length);
+		const currentToken = validToken(tokenString);
 
-		// Después copiamos el usuario...
-		const userCopy = {
-			...arrayUser[0],
-		};
-		// ...y eliminamos su contraseña por seguridad
-		delete userCopy["password"];
+		if (!currentToken) {
+			return res.status(401).json({ message: "Token inválido o expirado." });
+		}
 
-		// Finalmente, se manda la copia del usuario como respuesta
-		res.status(200).json({ user: userCopy });
-	} else {
-		res.status(404).send();
+		req.token = currentToken;
+		req.tokenEmail = tokens[currentToken];
+		next();
+	} catch (error) {
+		console.error("Error en el middleware de autenticación:", error);
+		return res
+			.status(500)
+			.json({ message: "Error del servidor durante la autenticación." });
 	}
+};
+
+/**
+ * GET /token/verify
+ * Verifica el token proporcionado en la cabecera y retorna los datos del usuario.
+ * Utiliza el middleware `authenticateToken` para validar el token antes de procesar la solicitud.
+ */
+router.get("/verify", authenticateToken, (req, res) => {
+	// Si el middleware 'authenticateToken' pasa, el token es válido.
+	// El correo del usuario ya está en req.tokenEmail.
+	const userMail = req.tokenEmail;
+	const user = users.find(
+		(u) => u.mail.toLowerCase() === userMail.toLowerCase()
+	);
+
+	if (!user) {
+		return res
+			.status(404)
+			.json({ message: "Usuario asociado al token no encontrado." });
+	}
+
+	const { password, ...userResponse } = user;
+	res.status(200).json({ user: userResponse, token: req.token });
 });
 
-/** OPTIONS */
+/**
+ * OPTIONS /
+ * Maneja las solicitudes OPTIONS para pre-vuelo CORS.
+ */
 router.options("/", function (req, res) {
 	res.status(200);
 	res.setHeader("Access-Control-Allow-Origin", "*");
