@@ -10,6 +10,14 @@ const authorizeUserModification = (req, res, next) => {
 	const emailFromToken = req.tokenEmail; // Lo da el middleware authenticateToken
 	// Obtenemos el correo del usuario a modificar desde la URL
 	const targetMail = req.params["mail"];
+
+	// Comprobación de seguridad: Asegurarse de que ambas variables existen.
+	if (!emailFromToken || !targetMail) {
+		return res
+			.status(400)
+			.json({ error: "Bad Request: No se pudo verificar la identidad del usuario." });
+	}
+
 	// Si el correo asociado al token no es el mismo que el correo del usuario que quiere actualizar su info...
 	// Esta comprobación de seguridad se hace para que otro usuario no pueda modificar la info del usuario actual
 	if (emailFromToken.toLowerCase() !== targetMail.toLowerCase()) {
