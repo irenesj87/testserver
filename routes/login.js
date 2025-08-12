@@ -1,23 +1,28 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcrypt");
 const users = require("../data/usersData");
 const tokens = require("../data/tokensData");
 const helpers = require("../helpers/helpers");
 
 /** LOGIN */
-router.post("/", function (req, res) {
+router.post("/", async function (req, res) {
 	// Obtenemos el correo y la contraseña del usuario que se quiere loguear
 	const { mail, password } = req.body;
 
-	// Después, buscamos en la base de datos si hay un usuario con ese correo y esa contraseña
+	// 1. Buscamos al usuario solo por su correo electrónico.
 	const foundUser = users.find(
-		(user) =>
-			user.mail.toLowerCase() === mail.toLowerCase() &&
-			user.password === password
+		(user) => user.mail.toLowerCase() === mail.toLowerCase()
 	);
 
-	// Si no se encuentra ningún usuario con esas credenciales
-	if (!foundUser) {
+	// 2. Si se encuentra el usuario, comparamos la contraseña proporcionada con el hash almacenado.
+	// bcrypt.compare se encarga de forma segura de la comparación.
+	const passwordMatch = foundUser
+		? await bcrypt.compare(password, foundUser.password)
+		: false;
+
+	// Si el usuario no existe o la contraseña no coincide, devolvemos un error genérico.
+	if (!foundUser || !passwordMatch) {
 		return res
 			.status(401)
 			.json({ error: "Datos erróneos. Inténtalo de nuevo." });

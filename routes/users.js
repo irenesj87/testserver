@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcrypt");
 const users = require("../data/usersData");
 const excursions = require("../data/excursionsData");
 const { authenticateToken } = require("../authMiddleware");
@@ -43,7 +44,7 @@ router.get("/", function (req, res, next) {
 let counter = 2;
 
 /** POST para crear un nuevo usuario */
-router.post("/", function (req, res) {
+router.post("/", async function (req, res) {
 	// Primero obtenemos el correo del usuario que se quiere registrar
 	const { mail } = req.body;
 	// Se comprueba si ya hay un usuario con ese correo
@@ -56,13 +57,12 @@ router.post("/", function (req, res) {
 			.status(409)
 			.json({ error: "Ya existe un usuario con ese correo electrónico." });
 	} else {
-		// IMPORTANTE: Aquí se debería hashear la contraseña antes de guardarla.
-		// Ejemplo con una librería como bcrypt:
-		// const hashedPassword = await bcrypt.hash(req.body.password, 10);
+		// Se hashea la contraseña antes de guardarla para no almacenarla en texto plano.
+		const hashedPassword = await bcrypt.hash(req.body.password, 10);
 		// Si no lo hay, creamos un usuario con la info mandada en la petición, un array vacío de excursiones y un id
 		const user = {
 			...req.body,
-			// password: hashedPassword, // Se guardaría la contraseña hasheada
+			password: hashedPassword, // Se guarda la contraseña hasheada
 			excursions: [],
 			id: counter,
 		};
