@@ -8,6 +8,7 @@ const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const excursionsRouter = require('./routes/excursions');
 const loginRouter = require('./routes/login');
+const logoutRouter = require('./routes/logout');
 const tokenRouter = require('./routes/token');
 const filtersRouter = require('./routes/filters');
 
@@ -22,10 +23,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-
-// Configurar cabeceras y cors
-app.use('/', indexRouter);app.use((req, res, next) => {
+ 
+// Configurar cabeceras y cors de forma centralizada.
+// Este middleware debe ir ANTES de que se definan las rutas.
+app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
@@ -33,9 +34,11 @@ app.use('/', indexRouter);app.use((req, res, next) => {
   next();
 });
 
+app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/excursions', excursionsRouter);
 app.use('/login', loginRouter);
+app.use('/logout', logoutRouter);
 app.use('/token', tokenRouter);
 app.use('/filters', filtersRouter);
 

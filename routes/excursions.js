@@ -46,9 +46,6 @@ router.get("/", function (req, res, next) {
 	// Se extrae el parámetro de búsqueda 'q' y el resto de filtros en un objeto 'filters'
 	const { q: search, ...filters } = req.query;
 
-	// Seteando las headers para poder mandar peticiones desde cualquier dominio
-	res.setHeader("Access-Control-Allow-Origin", "*");
-
 	// Copy variable of the excursions array, we use this to not change the info in the excursions array
 	let excursionsCopy = [...excursions];
 

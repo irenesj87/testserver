@@ -38,23 +38,4 @@ router.post("/", function (req, res) {
 	}
 });
 
-/** LOGOUT */
-router.delete("/", function (req, res, next) {
-	// Obtenemos el token del usuario...
-	const token = req.headers.authorization.substring("Bearer ".length);
-	// ...y se elimina de los tokens de la base de datos
-	delete tokens[token];
-	res.status(200).json({
-		token: token,
-	});
-});
-
-/** OPTIONS */
-router.options("/", function (req, res) {
-	res.status(200);
-	res.setHeader("Access-Control-Allow-Origin", "*");
-	res.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, OPTIONS");
-	res.send();
-});
-
 module.exports = router;

@@ -32,9 +32,9 @@ const excursions = [
 	},
 	{
 		id: 4,
-		name: "Excursión",
+		name: "Ruta del Oso",
 		area: "Este",
-		difficulty: "Alta",
+		difficulty: "Media",
 		time: "1 día",
 	},
 ];

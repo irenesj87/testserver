@@ -33,12 +33,4 @@ router.get("/", function (req, res, next) {
 	}
 });
 
-/** OPTIONS */
-router.options("/", function (req, res) {
-	res.status(200);
-	res.setHeader("Access-Control-Allow-Origin", "*");
-	res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS");
-	res.send();
-});
-
 module.exports = router;

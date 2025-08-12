@@ -1,44 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const tokens = require("../data/tokensData");
 const users = require("../data/usersData");
 const excursions = require("../data/excursionsData");
-const { validToken } = require("../helpers/helpers");
-
-/* Middleware: En Express.js son funciones que tienen acceso a los objetos request y response y la función next. Son los que 
-realizan los pasos que deben ir entre que una petición llega hasta que va a su handler route final. */
-// Middleware que dice si un token es válido o no
-const authenticateToken = (req, res, next) => {
-	try {
-		// Se guardan las credenciales de autenticación del usuario
-		const authHeader = req.headers.authorization;
-		if (!authHeader?.startsWith("Bearer ")) {
-			console.log(
-				"Auth Middleware: La cabecera de autorización no se encuentra o es inválida."
-			);
-			return res
-				.status(401)
-				.json({ error: "Cabecera de autorización no encontrada o inválida." });
-		}
-		// Se obtiene el token de la cabecera
-		const tokenString = authHeader.substring("Bearer ".length);
-		const currentToken = validToken(tokenString); // Retorna un string con el token si es válido y null si no lo es
-		console.log("Auth Middleware: Token validado:", currentToken);
-		if (!currentToken) {
-			return res.status(401).json({ error: "Token inválido o expirado." });
-		}
-		// Mete el token y su correo asociado al objeto request
-		req.token = currentToken;
-		req.tokenEmail = tokens[currentToken];
-		console.log(`Auth Middleware: Attached req.tokenEmail = ${req.tokenEmail}`);
-		next();
-	} catch (error) {
-		console.error("Auth Middleware: Error inesperado:", error);
-		return res
-			.status(500)
-			.json({ error: "Error del servidor durante la autenticación." });
-	}
-};
+const { authenticateToken } = require("../authMiddleware");
 
 // Middleware que dice si un usuario puede modificar info o no
 const authorizeUserModification = (req, res, next) => {
@@ -213,13 +177,5 @@ router.put(
 		}
 	}
 );
-
-/** OPTIONS */
-router.options("/", function (req, res) {
-	res.status(200);
-	res.setHeader("Access-Control-Allow-Origin", "*");
-	res.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS");
-	res.send();
-});
 
 module.exports = router;
