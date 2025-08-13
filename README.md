@@ -1,4 +1,4 @@
-# Servidor de Prueba para Excursiones
+# Servidor de Prueba para "Excursiones Juntos" ⚙️
 
 Este proyecto es un servidor backend simple construido con Node.js y Express. Proporciona una API REST para gestionar y consultar una lista de excursiones, incluyendo funcionalidades de autenticación de usuarios, búsqueda y filtrado.
 
