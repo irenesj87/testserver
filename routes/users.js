@@ -4,6 +4,8 @@ const bcrypt = require("bcrypt");
 const users = require("../data/usersData");
 const excursions = require("../data/excursionsData");
 const { authenticateToken } = require("../authMiddleware");
+const tokens = require("../data/tokensData");
+const helpers = require("../helpers/helpers");
 
 // Middleware que dice si un usuario puede modificar info o no
 const authorizeUserModification = (req, res, next) => {
@@ -68,6 +70,9 @@ router.post("/", async function (req, res) {
 		};
 		// Y después se añade al array de usuarios
 		users.push(user);
+		// Generamos un token para el nuevo usuario
+		const token = helpers.generateToken();
+		tokens[token] = user.mail;
 		// Se prepara la respuesta sin la contraseña por seguridad
 		const { password, ...userResponse } = user;
 		res
@@ -78,9 +83,9 @@ router.post("/", async function (req, res) {
 			exacta donde se encuentra el recurso que se acaba de crear */
 			/* Esta línea setea la cabecera Location en la respuesta para apuntar a la URL específica del usuario que se acaba de crear.
 			Es una práctica estándar en las APIs RESTful */
-			.setHeader("Location", `http://localhost:3001/users/${counter}`);
+			.setHeader("Location", `http://localhost:3001/users/${user.id}`);
 		counter++;
-		res.json(userResponse);
+		res.json({ token: token, user: userResponse });
 	}
 });
 
@@ -152,33 +157,50 @@ router.get(
 
 /** POST para que un usuario se apunte a una excursión */
 router.post(
-	"/:mail/excursions/:id",
+	"/:mail/excursions",
 	authenticateToken,
 	authorizeUserModification,
 	function (req, res, next) {
-		console.log(`PUT /users/${req.params["mail"]} - Request received.`);
+		console.log(
+			`POST /users/${req.params["mail"]}/excursions - Request received.`
+		);
 		try {
 			// Obtenemos el correo del usuario a modificar desde la URL
 			const targetMail = req.params["mail"];
-			console.log("Route Handler: Target user email from URL:", targetMail);
+			// Obtenemos el ID de la excursión desde el cuerpo de la petición
+			const { excursionId } = req.body;
+
+			// Validamos que el excursionId se ha enviado.
+			if (!excursionId) {
+				return res
+					.status(400)
+					.json({ message: "El ID de la excursión es requerido." });
+			}
+
 			// Buscamos el usuario a actualizar
 			const currentUser = users.find(
-				(user) => user.mail.toLowerCase() == targetMail.toLowerCase()
+				(user) => user.mail.toLowerCase() === targetMail.toLowerCase()
 			);
 			// Comprobamos si el usuario existe
 			if (!currentUser) {
-				console.log(`User with email ${targetMail} not found.`);
 				return res.status(404).json({ error: "User not found." });
 			}
-			console.log("Route Handler: Found target user:", currentUser.mail);
+
+			// Verificamos si el usuario ya está apuntado para evitar duplicados.
+			if (currentUser.excursions.includes(excursionId)) {
+				return res
+					.status(409)
+					.json({ message: "Ya estás apuntado a esta excursión." });
+			}
+
 			// Se añade la excursión a su array de excursiones
-			currentUser.excursions.push(parseInt(req.params["id"]));
+			currentUser.excursions.push(excursionId);
 			// Se retorna el usuario actualizado sin la contraseña
 			const { password, ...userResponse } = currentUser;
 			res.status(200).json(userResponse);
 		} catch (error) {
 			console.error(
-				"Unexpected error in PUT /users/:mail/excursions/:id:",
+				"Unexpected error in POST /users/:mail/excursions:",
 				error
 			);
 			return res.status(500).json({ error: "Internal Server Error occurred." });

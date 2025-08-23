@@ -70,4 +70,4 @@ El servidor estará escuchando en `http://localhost:3001`.
 -   `GET /filters?type={filterType}`: Obtiene los valores únicos para un tipo de filtro (`area`, `difficulty`, `time`).
 -   `PUT /users/:mail`: Actualiza la información del perfil de un usuario (ruta protegida).
 -   `GET /users/:mail/excursions`: Obtiene las excursiones a las que un usuario se ha apuntado (ruta protegida).
--   `POST /users/:mail/excursions/:id`: Permite a un usuario apuntarse a una excursión (ruta protegida).
+-   `POST /users/:mail/excursions`: Permite a un usuario apuntarse a una excursión (ruta protegida).
