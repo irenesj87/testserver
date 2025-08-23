@@ -150,8 +150,8 @@ router.get(
 	}
 );
 
-/** PUT para actualizar la lista de excursiones a las que el usuario se ha apuntado */
-router.put(
+/** POST para que un usuario se apunte a una excursión */
+router.post(
 	"/:mail/excursions/:id",
 	authenticateToken,
 	authorizeUserModification,

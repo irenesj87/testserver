@@ -62,11 +62,12 @@ El servidor estará escuchando en `http://localhost:3001`.
 
 ## 🔌 Endpoints Principales
 
--   `POST /register`: Registra un nuevo usuario.
--   `POST /login`: Inicia sesión y retorna un token JWT.
+-   `POST /users`: Registra un nuevo usuario.
+-   `POST /login`: Inicia sesión y retorna un token.
 -   `GET /token/verify`: Valida un token existente (ruta protegida).
--   `DELETE /logout`: Invalida la sesión del usuario (simulado).
--   `GET /excursiones`: Retorna todas las excursiones, con filtros opcionales (`area`, `dificultad`, `tiempo`).
--   `GET /excursiones/search?q={termino}`: Busca excursiones por nombre.
--   `POST /excursiones/:id/join`: Permite a un usuario unirse a una excursión (ruta protegida).
--   `PUT /user`: Actualiza la información del perfil de un usuario (ruta protegida).
+-   `DELETE /logout`: Cierra la sesión del usuario (ruta protegida).
+-   `GET /excursions`: Retorna todas las excursiones. Permite filtrar por `q` (nombre), `area`, `difficulty` y `time`.
+-   `GET /filters?type={filterType}`: Obtiene los valores únicos para un tipo de filtro (`area`, `difficulty`, `time`).
+-   `PUT /users/:mail`: Actualiza la información del perfil de un usuario (ruta protegida).
+-   `GET /users/:mail/excursions`: Obtiene las excursiones a las que un usuario se ha apuntado (ruta protegida).
+-   `POST /users/:mail/excursions/:id`: Permite a un usuario apuntarse a una excursión (ruta protegida).
